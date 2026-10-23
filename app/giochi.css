@@ -87,6 +87,7 @@
   cursor: pointer;
 }
 .btn.ghost { background: #f3f4f6; color: #374151; border: 2px solid #d1d5db; }
+a.btn { display: inline-block; text-decoration: none; }
 .msg { font-weight: 600; font-size: 0.9rem; }
 .msg.error { color: #b91c1c; }
 .msg.ok { color: #15803d; }
@@ -155,5 +156,6 @@
   cursor: pointer;
 }
 .group-game:has(input:checked) { border-color: #48BB78; background: #f0fdf4; }
-.group-game input { width: 18px; height: 18px; accent-color: #48BB78; }
-.group-game .gi { font-size: 1.4rem; }
+.group-game input { width: 18px; height: 18px; flex-shrink: 0; accent-color: #48BB78; }
+.group-game .gi { font-size: 1.4rem; flex-shrink: 0; }
+.group-game .try { margin-left: auto; flex-shrink: 0; }
