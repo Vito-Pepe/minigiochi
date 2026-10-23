@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Queste tre righe decidono come compare il gioco nell'elenco dei giochi -->
+  <title>Puzzle</title>
+  <meta name="icona" content="🧩">
+  <meta name="description" content="Ricomponi l'immagine: 4 o 9 pezzi">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 2.5rem;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .back {
+      align-self: flex-start;
+      padding: 0.4rem 1rem;
+      border: 2px solid rgba(255,255,255,0.45);
+      border-radius: 25px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    h1 { font-size: 2.4rem; font-weight: 800; text-shadow: 0 3px 8px rgba(0,0,0,0.25); margin: 0.8rem 0 0.3rem; }
+    .sub { color: rgba(255,255,255,0.85); margin-bottom: 1.4rem; text-align: center; }
+    [hidden] { display: none !important; }
+
+    /* Scelta della modalità */
+    .modes { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+    .mode {
+      width: 160px;
+      padding: 1.3rem 1rem;
+      border: none;
+      border-radius: 22px;
+      background: #fff;
+      color: #6b7280;
+      font-family: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.15s;
+    }
+    .mode:hover { transform: translateY(-4px); }
+    .mode strong { color: #6C63FF; font-size: 1.3rem; }
+    .mini { display: grid; gap: 3px; width: 54px; height: 54px; }
+    .mini span { background: #dbeafe; border-radius: 4px; }
+    .mini.n3 span { background: #fce7f3; }
+
+    /* Gioco */
+    .goal { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+    .goal-pic {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .board {
+      --gap: 6px;
+      position: relative;
+      width: var(--size);
+      height: var(--size);
+      display: grid;
+      grid-template-columns: repeat(var(--n), 1fr);
+      gap: var(--gap);
+      padding: var(--gap);
+      background: rgba(255,255,255,0.18);
+      border-radius: 22px;
+      transition: gap 0.35s, padding 0.35s;
+    }
+    .board.solved { --gap: 0px; background: #fff; box-shadow: 0 10px 35px rgba(0,0,0,0.22); }
+    .piece {
+      position: relative;
+      overflow: hidden;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+      transition: transform 0.15s, box-shadow 0.15s, border-radius 0.35s;
+      touch-action: none;             /* il dito trascina il pezzo, non la pagina */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    @media (hover: hover) { .piece:hover { transform: translateY(-2px); } }
+    .piece.selected { box-shadow: 0 0 0 4px #FF6584, 0 6px 18px rgba(0,0,0,0.25); transform: scale(0.94); }
+    .piece.dragging { z-index: 5; transition: none; cursor: grabbing; box-shadow: 0 14px 30px rgba(0,0,0,0.3); }
+    .piece.drop { box-shadow: 0 0 0 4px #48BB78, 0 6px 18px rgba(0,0,0,0.25); transform: scale(0.94); }
+    .board.solved .piece { border-radius: 0; box-shadow: none; cursor: default; transform: none; }
+    .art {
+      position: absolute;
+      width: var(--inner);
+      height: var(--inner);
+      font-size: calc(var(--inner) * 0.78);
+      line-height: var(--inner);
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; margin-top: 1.4rem; }
+    .btn {
+      padding: 0.8rem 2.2rem;
+      border: none;
+      border-radius: 50px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn.coral { background: #FF6584; box-shadow: 0 6px 22px rgba(255,101,132,0.45); }
+    .btn.ghost { background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.45); font-size: 0.95rem; padding: 0.6rem 1.4rem; }
+    .win {
+      margin-top: 1.2rem;
+      background: #fff;
+      color: #6C63FF;
+      font-size: 1.5rem;
+      font-weight: 800;
+      padding: 0.8rem 1.8rem;
+      border-radius: 22px;
+      text-align: center;
+      animation: pop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .confetti {
+      position: fixed;
+      top: -12px;
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 99;
+      animation: fall linear forwards;
+    }
+    @keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 65% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+    @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">&#8592; Giochi</a>
+  <h1>Puzzle</h1>
+
+  <section id="start">
+    <p class="sub">Ricomponi l'immagine. Scegli quanti pezzi:</p>
+    <div class="modes">
+      <button class="mode" type="button" data-n="2">
+        <span class="mini" style="grid-template-columns:repeat(2,1fr)"><span></span><span></span><span></span><span></span></span>
+        <strong>Facile</strong>4 pezzi
+      </button>
+      <button class="mode" type="button" data-n="3">
+        <span class="mini n3" style="grid-template-columns:repeat(3,1fr)"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+        <strong>Difficile</strong>9 pezzi
+      </button>
+    </div>
+  </section>
+
+  <section id="play" hidden>
+    <p class="sub" id="hint">Trascina un pezzo sopra un altro per scambiarli</p>
+    <div class="goal">
+      <span>Ricomponi:</span>
+      <span class="goal-pic" id="goal"></span>
+    </div>
+    <div class="board" id="board"></div>
+    <p class="win" id="win" hidden></p>
+    <div class="actions">
+      <button class="btn coral" id="again" type="button" hidden>Ancora!</button>
+      <button class="btn ghost" id="change" type="button">Cambia pezzi</button>
+    </div>
+  </section>
+
+  <script>
+    // Immagini del puzzle: emoji e il loro nome (mostrato alla fine)
+    const PICTURES = [
+      ['🐶', 'un cane'], ['🐱', 'un gatto'], ['🐰', 'un coniglio'], ['🐸', 'una rana'],
+      ['🐻', 'un orso'], ['🦁', 'un leone'], ['🐷', 'un maiale'], ['🐮', 'una mucca'],
+      ['🐵', 'una scimmia'], ['🐼', 'un panda'], ['🦊', 'una volpe'], ['🐯', 'una tigre'],
+      ['🍎', 'una mela'], ['🍓', 'una fragola'], ['🍌', 'una banana'], ['🍉', 'un\'anguria'],
+      ['🌞', 'il sole'], ['🌈', 'un arcobaleno'], ['🏠', 'una casa'], ['🚗', 'una macchina'],
+      ['⚽', 'un pallone'], ['🎈', 'un palloncino'], ['🌻', 'un girasole'], ['🦋', 'una farfalla'],
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    let n = 2;            // pezzi per lato
+    let picture = null;   // [emoji, nome]
+    let order = [];       // order[posizione] = pezzo che si trova lì
+    let selected = null;  // posizione del pezzo selezionato
+    let solved = false;
+    let lastEmoji = '';
+    let drag = null;          // trascinamento in corso
+    let justDragged = false;  // evita che il rilascio conti anche come tocco
+
+    function shuffle(list) {
+      const a = list.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // Dimensioni della griglia in base allo schermo
+    function layout() {
+      const size = Math.min(window.innerWidth - 32, 380);
+      const board = $('board');
+      const gap = solved ? 0 : 6;                   // a puzzle risolto gli spazi si chiudono
+      const inner = size - 2 * gap;                 // area dentro il bordo
+      board.style.setProperty('--size', `${size}px`);
+      board.style.setProperty('--n', n);
+      board.style.setProperty('--inner', `${inner}px`);
+      board.dataset.tile = (inner - (n - 1) * gap) / n;
+    }
+
+    function newPuzzle() {
+      let pick;
+      do {
+        pick = PICTURES[Math.floor(Math.random() * PICTURES.length)];
+      } while (pick[0] === lastEmoji);
+      picture = pick;
+      lastEmoji = pick[0];
+      const ids = [...Array(n * n).keys()];
+      // Mescola finché almeno metà dei pezzi è fuori posto
+      do {
+        order = shuffle(ids);
+      } while (order.filter((v, i) => v !== i).length < Math.ceil((n * n) / 2));
+      selected = null;
+      solved = false;
+      $('goal').textContent = picture[0];
+      $('win').hidden = true;
+      $('again').hidden = true;
+      $('hint').hidden = false;
+      $('board').classList.remove('solved');
+      layout();
+      render();
+    }
+
+    function render() {
+      const board = $('board');
+      const tile = Number(board.dataset.tile);
+      const gap = solved ? 0 : 6;
+      board.replaceChildren();
+      order.forEach((piece, pos) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'piece';
+        btn.dataset.piece = piece;
+        btn.setAttribute('aria-label', `Pezzo ${pos + 1}`);
+        if (pos === selected) btn.classList.add('selected');
+        // Ogni pezzo mostra la sua parte della stessa emoji grande
+        const art = document.createElement('span');
+        art.className = 'art';
+        art.textContent = picture[0];
+        const row = Math.floor(piece / n);
+        const col = piece % n;
+        art.style.left = `${-col * (tile + gap)}px`;
+        art.style.top = `${-row * (tile + gap)}px`;
+        btn.append(art);
+        btn.addEventListener('click', () => {
+          if (justDragged) { justDragged = false; return; }
+          tap(pos);
+        });
+        btn.addEventListener('pointerdown', (e) => startDrag(e, pos, btn));
+        btn.addEventListener('pointermove', moveDrag);
+        btn.addEventListener('pointerup', () => endDrag(true));
+        btn.addEventListener('pointercancel', () => endDrag(false));
+        board.append(btn);
+      });
+    }
+
+    // Toccare due pezzi li scambia (resta possibile anche senza trascinare)
+    function tap(pos) {
+      if (solved) return;
+      if (selected === null) {
+        selected = pos;
+      } else if (selected === pos) {
+        selected = null;
+      } else {
+        [order[selected], order[pos]] = [order[pos], order[selected]];
+        selected = null;
+      }
+      render();
+      checkWin();
+    }
+
+    function checkWin() {
+      if (order.every((v, i) => v === i)) win();
+    }
+
+    // Posizione della griglia sotto il dito, o null se fuori
+    function posAt(x, y) {
+      const board = $('board');
+      const rect = board.getBoundingClientRect();
+      const step = Number(board.dataset.tile) + 6;
+      const col = Math.floor((x - rect.left - 6) / step);
+      const row = Math.floor((y - rect.top - 6) / step);
+      if (col < 0 || row < 0 || col >= n || row >= n) return null;
+      return row * n + col;
+    }
+
+    function startDrag(e, pos, btn) {
+      if (solved || drag || e.button > 0) return;
+      justDragged = false;
+      drag = { pos, btn, x: e.clientX, y: e.clientY, moving: false, target: null };
+      btn.setPointerCapture(e.pointerId);
+    }
+
+    function moveDrag(e) {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      if (!drag.moving) {
+        if (Math.hypot(dx, dy) < 8) return;   // un piccolo movimento è ancora un tocco
+        drag.moving = true;
+        selected = null;
+        $('board').querySelectorAll('.selected').forEach((b) => b.classList.remove('selected'));
+        drag.btn.classList.add('dragging');
+      }
+      drag.btn.style.transform = `translate(${dx}px, ${dy}px) scale(1.06)`;
+      let target = posAt(e.clientX, e.clientY);
+      if (target === drag.pos) target = null;
+      if (target !== drag.target) {
+        const pieces = $('board').children;
+        if (drag.target !== null) pieces[drag.target].classList.remove('drop');
+        if (target !== null) pieces[target].classList.add('drop');
+        drag.target = target;
+      }
+    }
+
+    function endDrag(drop) {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      if (!d.moving) return;                  // era un tocco: ci pensa il click
+      justDragged = true;
+      setTimeout(() => { justDragged = false; }, 400);
+      if (drop && d.target !== null) {
+        [order[d.pos], order[d.target]] = [order[d.target], order[d.pos]];
+        render();
+        checkWin();
+      } else {
+        // Rilasciato fuori: il pezzo torna al suo posto
+        if (d.target !== null) $('board').children[d.target].classList.remove('drop');
+        d.btn.classList.remove('dragging');
+        d.btn.style.transform = '';
+      }
+    }
+
+    function win() {
+      solved = true;
+      $('board').classList.add('solved');
+      // Dopo che gli spazi si sono chiusi, i pezzi formano l'immagine intera
+      setTimeout(() => {
+        layout();
+        render();
+      }, 360);
+      $('hint').hidden = true;
+      $('win').textContent = `Bravissimo! È ${picture[1]}!`;
+      $('win').hidden = false;
+      $('again').hidden = false;
+      confetti();
+    }
+
+    function confetti() {
+      const colors = ['#FF6584', '#48BB78', '#FFD166', '#6C63FF', '#4FC3F7', '#fff'];
+      for (let i = 0; i < 50; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti';
+        p.style.left = `${Math.random() * 100}vw`;
+        p.style.width = `${6 + Math.random() * 8}px`;
+        p.style.height = `${8 + Math.random() * 10}px`;
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = `${1.8 + Math.random() * 1.6}s`;
+        p.style.animationDelay = `${Math.random() * 0.4}s`;
+        document.body.append(p);
+        setTimeout(() => p.remove(), 4000);
+      }
+    }
+
+    document.querySelectorAll('.mode').forEach((b) => b.addEventListener('click', () => {
+      n = Number(b.dataset.n);
+      $('start').hidden = true;
+      $('play').hidden = false;
+      newPuzzle();
+    }));
+    $('again').addEventListener('click', newPuzzle);
+    $('change').addEventListener('click', () => {
+      $('play').hidden = true;
+      $('start').hidden = false;
+    });
+    window.addEventListener('resize', () => {
+      if ($('play').hidden) return;
+      layout();
+      render();
+    });
+  </script>
+</body>
+</html>

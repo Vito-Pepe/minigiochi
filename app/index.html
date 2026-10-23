@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minigiochi</title>
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="giochi.css">
+</head>
+<body>
+  <main>
+    <h1 class="title">Minigiochi</h1>
+    <p class="subtitle">Scegli un gioco</p>
+    <p id="status" class="status" hidden></p>
+    <div id="search-box" class="search" role="search" hidden>
+      <input id="search" type="search" placeholder="Cerca un gioco…" aria-label="Cerca un gioco per nome" autocomplete="off" enterkeyhint="search">
+    </div>
+    <p id="no-match" class="status" hidden></p>
+    <ul id="games" class="grid"></ul>
+
+    <button id="manage" class="manage-link" type="button">Gestisci giochi</button>
+
+    <section id="admin" class="panel" hidden>
+      <h2>Gestisci giochi</h2>
+      <p id="admin-off" class="hint" hidden>Il caricamento non è attivo: sul Pi va aggiunta <code>GIOCHI_PASSWORD</code> nel file <code>.env</code> di minigiochi.</p>
+
+      <form id="login" hidden>
+        <label>Password
+          <input id="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="btn" type="submit">Entra</button>
+      </form>
+
+      <div id="upload" hidden>
+        <label class="file">Carica un gioco (file .html)
+          <input id="file" type="file" accept=".html,.htm,text/html">
+        </label>
+        <p class="hint">Il nome nell'elenco viene dal titolo del gioco. Per scegliere l'icona, nel gioco va la riga <code>&lt;meta name="icona" content="🐶"&gt;</code>. I giochi caricati si possono eliminare con la ✕ sul loro riquadro.</p>
+      </div>
+
+      <div id="groups" hidden>
+        <h3>Gruppi di giochi</h3>
+        <p class="hint">Per mandare dei giochi a un genitore, crea un gruppo (anche con un gioco solo) e manda il suo link: con più giochi vedrà una pagina per sceglierli, con uno solo si apre subito il gioco. "Nuovo link" disattiva quello vecchio.</p>
+        <p id="no-public" class="hint warn" hidden>I link non hanno ancora l'indirizzo pubblico: sul Pi va aggiunto <code>GIOCHI_PUBLIC_URL</code> nel file <code>.env</code> di minigiochi.</p>
+        <ul id="group-list" class="group-list"></ul>
+        <button id="group-add" class="btn" type="button">+ Nuovo gruppo</button>
+
+        <form id="group-form" class="group-form" hidden>
+          <h3 id="group-title">Nuovo gruppo</h3>
+          <label>Nome del gruppo (lo vedi solo tu)
+            <input id="group-label" type="text" maxlength="60" autocomplete="off" placeholder="es. Giochi settimana 3">
+          </label>
+          <p class="hint warn">Non scrivere il nome del paziente: usa un riferimento che conosci solo tu.</p>
+          <fieldset>
+            <legend>Giochi del gruppo</legend>
+            <div id="group-games" class="group-games"></div>
+          </fieldset>
+          <div class="row">
+            <button class="btn" type="submit">Salva</button>
+            <button id="group-cancel" class="btn ghost" type="button">Annulla</button>
+            <button id="group-rotate" class="btn danger" type="button" hidden>Nuovo link</button>
+          </div>
+        </form>
+      </div>
+
+      <button id="logout" class="btn ghost" type="button" hidden>Esci</button>
+
+      <p id="admin-msg" class="msg" role="status" hidden></p>
+    </section>
+  </main>
+  <script src="giochi.js"></script>
+</body>
+</html>

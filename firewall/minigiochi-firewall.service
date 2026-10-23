@@ -1,0 +1,15 @@
+[Unit]
+Description=Isola i container di minigiochi dal resto della rete
+After=docker.service
+Requires=docker.service
+# Riapplica le regole quando Docker viene riavviato
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/minigiochi-firewall.sh apply
+ExecStop=/usr/local/sbin/minigiochi-firewall.sh remove
+
+[Install]
+WantedBy=docker.service
