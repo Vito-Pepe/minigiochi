@@ -288,6 +288,18 @@ function button(text, cls, onClick) {
   return b;
 }
 
+// "Prova": apre il gioco o il link del gruppo in una nuova scheda, senza lasciare la gestione
+function tryLink(href, title) {
+  const a = document.createElement("a");
+  a.className = "btn small ghost try";
+  a.href = href;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.textContent = "▶ Prova";
+  a.title = title;
+  return a;
+}
+
 function renderGroups() {
   $("no-public").hidden = Boolean(publicUrl);
   const list = $("group-list");
@@ -324,8 +336,10 @@ function renderGroups() {
       setTimeout(() => (copy.textContent = "Copia link"), 1800);
     });
     copy.disabled = !g.url;
+    row.append(copy);
+    // Il link del gruppo come lo vede il genitore (pagina di scelta, giochi in sandbox)
+    if (g.url && n) row.append(tryLink(g.url, "Apri il link come lo vede il genitore"));
     row.append(
-      copy,
       button("Modifica", "ghost", () => openGroupEditor(g)),
       button("Elimina", "danger", () => removeGroup(g)),
     );
@@ -356,7 +370,10 @@ function openGroupEditor(group) {
     icon.textContent = gameIcon(game);
     const text = document.createElement("span");
     text.textContent = gameTitle(game);
-    label.append(cb, icon, text);
+    // Il clic su "Prova" apre il gioco senza spuntare la casella (un link dentro un'etichetta
+    // non la attiva)
+    const tryIt = tryLink(game.dir + encodeURIComponent(game.file), `Prova ${gameTitle(game)}`);
+    label.append(cb, icon, text, tryIt);
     box.append(label);
   }
   if (games.length === 0) {

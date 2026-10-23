@@ -36,6 +36,8 @@ Chi apre il link, da qualsiasi telefono e senza Tailscale:
 
 I giochi sono serviti in **sandbox**: gli script funzionano, ma il gioco non può salvare dati nel browser né vedere cookie o altre pagine. A ogni gioco viene aggiunto al volo un piccolo script per i link che portano fuori dal gioco (es. "← Giochi"): con più giochi riportano alla pagina di scelta del gruppo, con un gioco solo vengono nascosti. I file dei giochi non vengono modificati.
 
+Nella gestione ci sono due pulsanti **▶ Prova**: accanto a ogni gioco del modulo del gruppo (apre il gioco in una nuova scheda, senza spuntarlo) e su ogni gruppo creato (apre il link come lo vede il genitore, con la pagina di scelta e i giochi in sandbox).
+
 Eliminando un gioco, viene tolto anche dai gruppi; un gruppo rimasto senza giochi ha il link disattivato.
 
 Tutto questo lo serve la seconda porta del servizio `giochi` (`127.0.0.1:8086`, visibile solo sul Pi), che risponde solo a un codice di gruppo valido (casuale, 128 bit). Esce su Internet dall'ingresso pubblico di Parole (`parole-esercizi`, percorso `/m/`, configurato nella repo parole). I gruppi stanno nel volume `minigiochi_giochi-stato`, separato dai giochi.
@@ -44,7 +46,7 @@ Limite: un gioco pubblicato deve stare in un solo file (immagini incorporate o p
 
 ## Differenze dalla sezione Giochi della homepage
 
-Il codice è lo stesso della homepage (`app/giochi/` e `uploader/` di quella repo), con tre differenze nel servizio:
+Il codice è lo stesso della homepage (`app/giochi/` e `uploader/` di quella repo), tranne i pulsanti "▶ Prova" nella gestione dei gruppi (solo qui) e tre differenze nel servizio:
 
 | | homepage | minigiochi |
 |---|---|---|
