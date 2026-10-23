@@ -28,4 +28,4 @@ docker compose up --build -d
 echo "==> Pulizia immagini obsolete..."
 docker image prune -f
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') — aggiornamento completato. Minigiochi disponibile su http://127.0.0.1:8085"
+echo "$(date '+%Y-%m-%d %H:%M:%S') — aggiornamento completato. Minigiochi disponibile su http://127.0.0.1:8087"

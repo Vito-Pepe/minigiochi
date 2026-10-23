@@ -2,7 +2,7 @@
 # Isola i container di minigiochi (nginx e servizio giochi): blocca ogni connessione NUOVA
 # che esce dal loro bridge (br-minigiochi) verso LAN, tailnet, Internet e verso il Pi stesso.
 # Restano permesse le connessioni tra i due container (nginx -> giochi) e le risposte alle
-# richieste in arrivo sulle porte 8085 e 8086, quindi pagina e link dei giochi funzionano.
+# richieste in arrivo sulle porte 8086 e 8087, quindi pagina e link dei giochi funzionano.
 #
 # Uso: sudo minigiochi-firewall.sh [apply|remove|status]
 

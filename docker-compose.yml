@@ -2,9 +2,9 @@ services:
   minigiochi:
     build: .
     ports:
-      # Raggiungibile dalla LAN (http://IP-DEL-PI:8085) e dalla tailnet
-      # (http://<nome>.<tailnet>.ts.net:8085). Mai su Internet.
-      - "8085:80"
+      # Raggiungibile dalla LAN (http://IP-DEL-PI:8087) e dalla tailnet
+      # (http://<nome>.<tailnet>.ts.net:8087). Mai su Internet.
+      - "8087:80"
     volumes:
       # Giochi caricati dalla pagina: nginx li serve in sola lettura su /caricati/
       - giochi-caricati:/usr/share/nginx/html/caricati:ro
