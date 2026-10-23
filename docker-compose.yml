@@ -1,0 +1,55 @@
+services:
+  minigiochi:
+    build: .
+    ports:
+      # Raggiungibile dalla LAN (http://IP-DEL-PI:8085) e dalla tailnet
+      # (http://<nome>.<tailnet>.ts.net:8085). Mai su Internet.
+      - "8085:80"
+    volumes:
+      # Giochi caricati dalla pagina: nginx li serve in sola lettura su /caricati/
+      - giochi-caricati:/usr/share/nginx/html/caricati:ro
+    depends_on:
+      - giochi
+    networks:
+      - giochi-net
+    restart: unless-stopped
+
+  # Servizio dei giochi: riceve i giochi caricati dalla pagina (password GIOCHI_PASSWORD
+  # del file .env) e gestisce i gruppi di giochi con link pubblico.
+  giochi:
+    build: ./uploader
+    ports:
+      # Solo i giochi tramite link: visibile solo sul Pi stesso, esce su Internet
+      # dall'ingresso pubblico di Parole (percorso /m/, vedi README)
+      - "127.0.0.1:8086:3001"
+    environment:
+      - GIOCHI_PASSWORD=${GIOCHI_PASSWORD:-}
+      # Indirizzo base dei link pubblici, es. https://parole-esercizi.<tailnet>.ts.net/m
+      - GIOCHI_PUBLIC_URL=${GIOCHI_PUBLIC_URL:-}
+    volumes:
+      - giochi-caricati:/data
+      # Gruppi e codici dei link: privati, fuori dalla cartella che nginx rende elencabile
+      - giochi-stato:/state
+      # Giochi della repo, per poterli mettere nei gruppi
+      - ./app/files:/repo:ro
+    networks:
+      - giochi-net
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    pids_limit: 50
+    restart: unless-stopped
+
+networks:
+  # Bridge con nome fisso: le regole in firewall/ impediscono ai container di aprire
+  # connessioni verso LAN, Pi e Internet (nginx e giochi possono parlarsi tra loro).
+  giochi-net:
+    driver_opts:
+      com.docker.network.bridge.name: br-minigiochi
+
+volumes:
+  giochi-caricati:
+  giochi-stato:

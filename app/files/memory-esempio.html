@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Queste tre righe decidono come compare il gioco nell'elenco dei giochi -->
+  <title>Memory (esempio)</title>
+  <meta name="icona" content="🃏">
+  <meta name="description" content="Trova le coppie di animali">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 2rem;
+      color: #fff;
+    }
+    .back {
+      align-self: flex-start;
+      padding: 0.4rem 1rem;
+      border: 2px solid rgba(255,255,255,0.45);
+      border-radius: 25px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    h1 { font-size: 2.4rem; font-weight: 800; text-shadow: 0 3px 8px rgba(0,0,0,0.25); margin: 0.8rem 0 0.3rem; }
+    p { color: rgba(255,255,255,0.85); margin-bottom: 1.4rem; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(64px, 96px));
+      gap: 0.7rem;
+    }
+    .cell {
+      aspect-ratio: 1;
+      border: none;
+      border-radius: 18px;
+      font-size: 2.6rem;
+      cursor: pointer;
+      background: rgba(255,255,255,0.22);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      transition: transform 0.15s, background 0.15s;
+    }
+    .cell:hover { transform: translateY(-3px); }
+    .cell.open { background: #fff; }
+    .cell.done { background: #48BB78; cursor: default; }
+    .win {
+      margin-top: 1.4rem;
+      background: #fff;
+      color: #6C63FF;
+      font-size: 1.5rem;
+      font-weight: 800;
+      padding: 0.8rem 1.8rem;
+      border-radius: 22px;
+    }
+    .again {
+      margin-top: 1rem;
+      padding: 0.8rem 2.6rem;
+      border: none;
+      border-radius: 50px;
+      background: #FF6584;
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">&#8592; Giochi</a>
+  <h1>Memory</h1>
+  <p>Trova le coppie uguali</p>
+  <div id="board" class="board"></div>
+  <div id="win" class="win" hidden>Bravissimo! 🎉</div>
+  <button id="again" class="again" type="button" hidden>Ancora!</button>
+
+  <script>
+    const ANIMALS = ['🐶', '🐱', '🐰', '🐸', '🐻', '🐵'];
+    const board = document.getElementById('board');
+    let open = [];
+    let found = 0;
+
+    function start() {
+      const deck = [...ANIMALS, ...ANIMALS].sort(() => Math.random() - 0.5);
+      board.replaceChildren();
+      open = [];
+      found = 0;
+      document.getElementById('win').hidden = true;
+      document.getElementById('again').hidden = true;
+      deck.forEach((animal) => {
+        const cell = document.createElement('button');
+        cell.className = 'cell';
+        cell.type = 'button';
+        cell.dataset.animal = animal;
+        cell.setAttribute('aria-label', 'Carta coperta');
+        cell.addEventListener('click', () => flip(cell));
+        board.append(cell);
+      });
+    }
+
+    function flip(cell) {
+      if (open.length === 2 || cell.classList.contains('open') || cell.classList.contains('done')) return;
+      cell.classList.add('open');
+      cell.textContent = cell.dataset.animal;
+      open.push(cell);
+      if (open.length < 2) return;
+
+      const [a, b] = open;
+      if (a.dataset.animal === b.dataset.animal) {
+        a.classList.add('done');
+        b.classList.add('done');
+        open = [];
+        found += 1;
+        if (found === ANIMALS.length) {
+          document.getElementById('win').hidden = false;
+          document.getElementById('again').hidden = false;
+        }
+      } else {
+        setTimeout(() => {
+          [a, b].forEach((c) => { c.classList.remove('open'); c.textContent = ''; });
+          open = [];
+        }, 800);
+      }
+    }
+
+    document.getElementById('again').addEventListener('click', start);
+    start();
+  </script>
+</body>
+</html>
