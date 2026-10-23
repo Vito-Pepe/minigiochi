@@ -2,7 +2,7 @@
 
 Raccolta di minigiochi HTML per bambini, servita da nginx in un container Docker sul Raspberry Pi. È la stessa sezione "Giochi" della homepage, ma in un'app a sé: giochi, gruppi e password sono separati da quelli della homepage.
 
-- Pagina: `http://IP-DEL-PI:8085` dalla rete di casa, `http://<nome>.<tailnet>.ts.net:8085` (o `http://vito:8085`) dalla tailnet.
+- Pagina: `http://IP-DEL-PI:8087` dalla rete di casa, `http://<nome>.<tailnet>.ts.net:8087` (o `http://vito:8087`) dalla tailnet.
 - Link per i genitori: `https://parole-esercizi.<tailnet>.ts.net/m/<codice>`, da qualsiasi telefono.
 
 ## Aggiungere un gioco
@@ -64,7 +64,7 @@ cd minigiochi
  read -rsp "Password per caricare i giochi: " P && echo "GIOCHI_PASSWORD=$P" >> .env && unset P && echo
 echo "GIOCHI_PUBLIC_URL=https://parole-esercizi.<tailnet>.ts.net/m" >> .env
 docker compose up -d --build
-curl -I http://127.0.0.1:8085
+curl -I http://127.0.0.1:8087
 ```
 
 Aggiornamento automatico ogni 5 minuti (senza sudo):
@@ -103,5 +103,5 @@ docker run --rm -v minigiochi_giochi-stato:/data -v "$HOME":/backup alpine tar c
 
 | Uso | Porta |
 |---|---|
-| Pagina (LAN e tailnet, http) | 8085 |
+| Pagina (LAN e tailnet, http) | 8087 (la 8085 è di Chess) |
 | Link pubblici (solo sul Pi, esce dal funnel di Parole su `/m/`) | 127.0.0.1:8086 |
